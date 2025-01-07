@@ -695,16 +695,16 @@
                        for="§RANDOM_ID§-edge-checkbox">Show edges</label>
 
                 <input class="§RANDOM_ID§-checkbox"
-                       id="§RANDOM_ID§-edge-checkbox-Group1"
+                       id="§RANDOM_ID§-edge-checkbox-group1"
                        type="checkbox">
                 <label class="§RANDOM_ID§-label"
-                       for="§RANDOM_ID§-edge-checkbox-Group1">Show edges of Group 1</label>
+                       for="§RANDOM_ID§-edge-checkbox-group1">Show edges of Group 1</label>
 
                 <input class="§RANDOM_ID§-checkbox"
-                       id="§RANDOM_ID§-edge-checkbox-Group2"
+                       id="§RANDOM_ID§-edge-checkbox-group2"
                        type="checkbox">
                 <label class="§RANDOM_ID§-label"
-                       for="§RANDOM_ID§-edge-checkbox-Group2">Show edges of Group 2</label>
+                       for="§RANDOM_ID§-edge-checkbox-group2">Show edges of Group 2</label>
               </div>
             </div>
           </div>
@@ -1094,6 +1094,10 @@
             state.nodeLabelFont = §NODE_LABEL_FONT§;
             // Edges
             state.showEdges = §SHOW_EDGE§;
+            // edgelist_membership
+            state.showEdgeGroup1 = §SHOW_EDGE_GROUP1§;
+            state.showEdgeGroup2 = §SHOW_EDGE_GROUP2§;  
+
             state.edgeSizeFactor = §EDGE_SIZE_FACTOR§;
             state.edgeCurvature = §EDGE_CURVATURE§;
             state.edgeHoverTooltip = §EDGE_HOVER_TOOLTIP§,
@@ -1102,12 +1106,6 @@
             state.edgeLabelSizeFactor = §EDGE_LABEL_SIZE_FACTOR§;
             state.edgeLabelRotation = §EDGE_LABEL_ROTATION§;
             state.edgeLabelFont = §EDGE_LABEL_FONT§;
-
-
-            // edgelist_membership
-            //state.edgelist_membership = §EDGELIST_MEMBERSHIP§;
-            
-
 
             // Layout algorithm
             state.layoutAlgorithmActive = §LAYOUT_ALGORITHM_ACTIVE§;
@@ -2670,10 +2668,25 @@
               state.currentGraphParts.edgeMainGroup = view.append("g")
                 .attr("id", "§RANDOM_ID§-edge-group")
                 .style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+
+
+
+              // edgelist_membership
+              state.currentGraphParts.edgeGroup1 = view.append("g")
+                .attr("id", "§RANDOM_ID§-edge-group1")
+                .style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+
+              state.currentGraphParts.edgeGroup2 = view.append("g")
+                .attr("id", "§RANDOM_ID§-edge-group2")
+                .style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+
+
               state.currentGraphParts.edgeGroups = state.currentGraphParts.edgeMainGroup
                 .selectAll("g")
                 .data(data.edges)
                 .join("g");
+
+
               // Nodes
               state.currentGraphParts.nodeMainGroup = view.append("g")
                 .attr("id", "§RANDOM_ID§-node-group")
@@ -3655,6 +3668,8 @@
           ui.elements.edgeSizeNormalizationMinSlider.value = state.edgeSizeNormalizationMin;
           ui.elements.edgeSizeNormalizationMaxText.innerHTML = ui.convert.numberToText(state.edgeSizeNormalizationMax);
           ui.elements.edgeSizeNormalizationMaxSlider.value = state.edgeSizeNormalizationMax;
+
+
           // Nodes
           ui.composites.menu.setItem(ui.elements.nodeHead, ui.elements.nodeBody, false);
           ui.elements.nodeCheckbox.checked = state.showNodes;
@@ -3684,8 +3699,8 @@
 
 
           // edgelist_membership
-          //ui.elements.edgeCheckboxGroup1.checked = True;
-          //ui.elements.edgeCheckboxGroup2.checked = True;
+          ui.elements.edgeCheckboxGroup1.checked = state.showEdges;
+          ui.elements.edgeCheckboxGroup2.checked = state.showEdges;
 
 
 
@@ -4035,29 +4050,69 @@
           ui.elements.edgeHead.onclick = function(){
             ui.composites.menu.toggleItem(ui.elements.edgeHead, ui.elements.edgeBody);
           };
+
           ui.elements.edgeCheckbox.onchange = function(){
-            state.showEdges = this.checked;
-            state.currentGraphParts.edgeMainGroup.style("display", ui.convert.boolToDisplayStyle(state.showEdges));
-            ui.composites.graph.updateEdgePositions();
+          state.showEdges = this.checked;
+          state.currentGraphParts.edgeMainGroup.style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+          ui.composites.graph.updateEdgePositions();
+          if (state.showEdges) {
+            ui.elements.edgeCheckboxGroup1.checked = false;
+            ui.elements.edgeCheckboxGroup2.checked = false;
+            d3.selectAll('.edge')
+            .style('display', 'block');
+          }
           };
 
 
-          //edgelist_membership
-          // make two checkboxes - one for each edge list in edgelist_membership
-          // when one is checked, show edges from that list
-
+          // //edgelist_membership 
           // ui.elements.edgeCheckboxGroup1.onchange = function(){
-          // state.edgelist1 = this.checked;
-          // state.currentGraphParts.edgeGroups
-          //   .filter(d => d.edgelist_membership === "list1")
-          //   .style("display", ui.convert.boolToDisplayStyle(state.edgesGroup1));
+          //   state.showEdges = this.checked;
+          //   state.currentGraphParts.edgeMainGroup.style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+          //   ui.composites.graph.updateEdgePositions();
           // };
           // ui.elements.edgeCheckboxGroup2.onchange = function(){
-          // state.edgelist2 = this.checked;
-          // state.currentGraphParts.edgeGroups
-          //   .filter(d => d.edgelist_membership === "list2")
-          //   .style("display", ui.convert.boolToDisplayStyle(state.edgesGroup2));
+          //   state.showEdges = this.checked;
+          //   state.currentGraphParts.edgeMainGroup.style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+          //   ui.composites.graph.updateEdgePositions();
           // };
+          
+
+
+          //edgelist_membership 
+          ui.elements.edgeCheckboxGroup1.onchange = function() {
+          const showEdgeGroup1 = this.checked;
+          if (showEdgeGroup1) {
+            ui.elements.edgeCheckbox.checked = false;
+            state.showEdges = false;
+            state.currentGraphParts.edgeMainGroup.style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+          }
+          d3.selectAll('.edge')
+            .style('display', function(d) {
+            if (d.edgelist_membership === 'list1') {
+              return showEdgeGroup1 ? 'block' : 'none';
+            }
+            return d3.select(this).style('display');
+            });
+          ui.composites.graph.updateEdgePositions();
+          };
+
+          ui.elements.edgeCheckboxGroup2.onchange = function() {
+          const showEdgeGroup2 = this.checked;
+          if (showEdgeGroup2) {
+            ui.elements.edgeCheckbox.checked = false;
+            state.showEdges = false;
+            state.currentGraphParts.edgeMainGroup.style("display", ui.convert.boolToDisplayStyle(state.showEdges));
+          }
+          d3.selectAll('.edge')
+            .style('display', function(d) {
+            if (d.edgelist_membership === 'list2') {
+              return showEdgeGroup2 ? 'block' : 'none';
+            }
+            return d3.select(this).style('display');
+            });
+          ui.composites.graph.updateEdgePositions();
+          };
+
 
 
 

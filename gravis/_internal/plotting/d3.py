@@ -35,7 +35,9 @@ def d3(data,
        use_x_positioning_force=False, x_positioning_force_strength=0.2,
        use_y_positioning_force=False, y_positioning_force_strength=0.2,
        use_centering_force=True,
-       show_edge=False,
+       show_edge=True,
+       show_edge_group1=False,
+       show_edge_group2=False
                ):
     """Create an interactive graph visualization with HTML/CSS/JS based on d3.v7.js.
 
@@ -241,6 +243,8 @@ def d3(data,
 
     _ca(show_edge, 'show_edge', bool)
     
+    _ca(show_edge_group1, 'show_edge_group1', bool)
+    _ca(show_edge_group2, 'show_edge_group2', bool)
 
     _ca(edge_size_factor, 'edge_size_factor', (int, float))
     _ca(edge_size_data_source, 'edge_size_data_source', str)
@@ -318,7 +322,8 @@ def d3(data,
         'SHOW_EDGE': _ts.to_json(show_edge),
         
         # edgelist_membership
-        #'EDGELIST_MEMBERSHIP': _ts.to_json(edgelist_membership),
+        'SHOW_EDGE_GROUP1': _ts.to_json(show_edge_group1),
+        'SHOW_EDGE_GROUP2': _ts.to_json(show_edge_group2),
 
 
 
