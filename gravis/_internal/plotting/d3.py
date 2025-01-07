@@ -17,7 +17,7 @@ def d3(data,
        show_node_image=True, node_image_size_factor=1.0,
        show_node_label=True, show_node_label_border=True, node_label_data_source='id',
        node_label_size_factor=1.0, node_label_rotation=0.0, node_label_font='Arial',
-       show_edge=True, edge_size_factor=1.0,
+       edge_size_factor=1.0,
        edge_size_data_source='size', use_edge_size_normalization=False,
        edge_size_normalization_min=0.2, edge_size_normalization_max=5.0,
        edge_curvature=0.0, edge_hover_tooltip=True,
@@ -34,7 +34,9 @@ def d3(data,
        collision_force_strength=0.7,
        use_x_positioning_force=False, x_positioning_force_strength=0.2,
        use_y_positioning_force=False, y_positioning_force_strength=0.2,
-       use_centering_force=True):
+       use_centering_force=True,
+       show_edge=False,
+               ):
     """Create an interactive graph visualization with HTML/CSS/JS based on d3.v7.js.
 
     Parameters
@@ -235,7 +237,11 @@ def d3(data,
     _ca(node_label_size_factor, 'node_label_size_factor', (int, float))
     _ca(node_label_rotation, 'node_label_rotation', (int, float))
     _ca(node_label_font, 'node_label_font', str)
+    
+
     _ca(show_edge, 'show_edge', bool)
+    
+
     _ca(edge_size_factor, 'edge_size_factor', (int, float))
     _ca(edge_size_data_source, 'edge_size_data_source', str)
     _ca(use_edge_size_normalization, 'use_edge_size_normalization', bool)
@@ -270,7 +276,10 @@ def d3(data,
     _ca(use_y_positioning_force, 'use_y_positioning_force', bool)
     _ca(y_positioning_force_strength, 'y_positioning_force_strength', (int, float))
     _ca(use_centering_force, 'use_centering_force', bool)
+
+
     data = _internal.normalize_graph_data(data)
+    
 
     # Transformation
     site_template = _ts.load('templates/d3.html')
@@ -305,7 +314,14 @@ def d3(data,
         'NODE_LABEL_ROTATION': _ts.to_json(node_label_rotation),
         'NODE_LABEL_FONT': _ts.to_json(node_label_font),
 
+
         'SHOW_EDGE': _ts.to_json(show_edge),
+        
+        # edgelist_membership
+        #'EDGELIST_MEMBERSHIP': _ts.to_json(edgelist_membership),
+
+
+
         'EDGE_SIZE_FACTOR': _ts.to_json(edge_size_factor),
         'EDGE_SIZE_DATA_SOURCE': _ts.to_json(edge_size_data_source),
         'USE_EDGE_SIZE_NORMALIZATION': _ts.to_json(use_edge_size_normalization),
@@ -345,6 +361,7 @@ def d3(data,
         'USE_Y_POSITIONING_FORCE': _ts.to_json(use_y_positioning_force),
         'Y_POSITIONING_FORCE_STRENGTH': _ts.to_json(y_positioning_force_strength),
         'USE_CENTERING_FORCE': _ts.to_json(use_centering_force),
+    
     }
     html = _ts.insert(site_template, insert_data)
     fig = _ds.Figure(html)

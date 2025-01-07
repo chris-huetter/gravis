@@ -669,6 +669,11 @@
             </div>
           </div>
         </div>
+
+
+
+
+
         <!-- Menu: Edges -->
         <div class="§RANDOM_ID§-menu-item-head"
              id="§RANDOM_ID§-edge-head">
@@ -688,9 +693,26 @@
                        type="checkbox">
                 <label class="§RANDOM_ID§-label"
                        for="§RANDOM_ID§-edge-checkbox">Show edges</label>
+
+                <input class="§RANDOM_ID§-checkbox"
+                       id="§RANDOM_ID§-edge-checkbox-Group1"
+                       type="checkbox">
+                <label class="§RANDOM_ID§-label"
+                       for="§RANDOM_ID§-edge-checkbox-Group1">Show edges of Group 1</label>
+
+                <input class="§RANDOM_ID§-checkbox"
+                       id="§RANDOM_ID§-edge-checkbox-Group2"
+                       type="checkbox">
+                <label class="§RANDOM_ID§-label"
+                       for="§RANDOM_ID§-edge-checkbox-Group2">Show edges of Group 2</label>
               </div>
             </div>
           </div>
+
+
+
+
+
           <!-- Sub-menu: Size -->
           <div>
             <div class="§RANDOM_ID§-menu-subitem-head">
@@ -735,6 +757,7 @@
             </div>
           </div>
         </div>
+
         <!-- Menu: Edge labels -->
         <div class="§RANDOM_ID§-menu-item-head"
              id="§RANDOM_ID§-edge-label-head">
@@ -1079,6 +1102,13 @@
             state.edgeLabelSizeFactor = §EDGE_LABEL_SIZE_FACTOR§;
             state.edgeLabelRotation = §EDGE_LABEL_ROTATION§;
             state.edgeLabelFont = §EDGE_LABEL_FONT§;
+
+
+            // edgelist_membership
+            //state.edgelist_membership = §EDGELIST_MEMBERSHIP§;
+            
+
+
             // Layout algorithm
             state.layoutAlgorithmActive = §LAYOUT_ALGORITHM_ACTIVE§;
             state.useManyBodyForce = §USE_MANY_BODY_FORCE§;
@@ -1123,6 +1153,21 @@
               }
               return def
             },
+
+            getMembership(obj, prop, def){
+              try{
+                const value = obj[prop];
+                console.log("C_DEBUG in getMembership rawDataParser: ", value); 
+
+                if(!Array.isArray(value) || !value.every(item => typeof item === 'string')){
+                  throw "Invalid value. Not a list of strings.";
+                }
+                return value;
+                } catch(e){
+                return def;
+              }
+            },
+
 
             getString(obj, prop, def) {
               try{
@@ -1174,7 +1219,18 @@
             },
           },
 
+
+
           rawMetadataParser:{
+
+
+            getMembership(obj,prop, def){
+              //console.log("C_DEBUG in getMembership rawMetadataParser obj.metadata.edgelist_membership: ", obj.metadata.edgelist_membership); 
+              const value = obj.metadata[prop];
+              //console.log("C_DEBUG in getMembership rawMetadataParser obj.metadata[prop]: ", value); 
+              return value;
+            },
+
             getString(obj, prop, def){
               try{
                 const value = String(obj.metadata[prop]);
@@ -1186,6 +1242,7 @@
                 return def;
               }
             },
+
             getColor(obj, prop, def){
               function isBodyidColor(strColor) {
                 const sty = new Option().style;
@@ -1323,9 +1380,12 @@
               edge_label_size: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "edge_label_size", 8.0),
               edge_hover: state.manager.rawMetadataParser.getString(givenData, "edge_hover", ""),
               edge_click: state.manager.rawMetadataParser.getString(givenData, "edge_click", ""),
+
+
               contains_edge_hover: false,
               contains_edge_click: false,
             };
+            
             if(!parsedData.general.directed){
               parsedData.general.arrow_size = 0.0;
             }
@@ -1478,6 +1538,14 @@
               parsedEdge.id = result.id;
               parsedEdge.multi_edge_counter = result.count;
               parsedEdge.label = state.manager.rawDataParser.getString(givenEdge, "label", "");
+
+              // edgelist_membership from edge attribute "edgelist_membership"
+              //console.log("C_DEBUG in line 1545: givenEdge : ", givenEdge);
+              //console.log("C_DEBUG in line 1545: parsedEdge : ", parsedEdge);
+
+              parsedEdge.edgelist_membership = state.manager.rawMetadataParser.getMembership(givenEdge, "edgelist_membership", []);
+              //console.log("Line 1531 d3.html: edgelist_membership: ", parsedEdge.edgelist_membership);
+
               // defined metadata
               parsedEdge.color = state.manager.rawMetadataParser.getColor(givenEdge, "color", parsedData.general.edge_color);
               parsedEdge.opacity = state.manager.rawMetadataParser.getFinitePositiveNumber(givenEdge, "opacity", parsedData.general.edge_opacity);
@@ -1541,7 +1609,8 @@
               "edge_label_text_data_sources": nonNumericProperties.concat(numericProperties).filter(
                 item => item !== "source" && item !== "target" && item !== "multi_edge_counter"),
               "minima": minima,
-              "maxima": maxima,
+              "maxima": maxima
+
             }
             // Report invalid edges
             if(ignoredEdges.length > 0){
@@ -2032,7 +2101,16 @@
           // Edges
           edgeHead: document.getElementById("§RANDOM_ID§-edge-head"),
           edgeBody: document.getElementById("§RANDOM_ID§-edge-body"),
+
           edgeCheckbox: document.getElementById("§RANDOM_ID§-edge-checkbox"),
+
+
+          // edgelist_membership
+          edgeCheckboxGroup1: document.getElementById("§RANDOM_ID§-edge-checkbox-group1"),
+          edgeCheckboxGroup2: document.getElementById("§RANDOM_ID§-edge-checkbox-group2"),
+
+
+
           edgeSizeFactorText: document.getElementById("§RANDOM_ID§-edge-size-factor-text"),
           edgeSizeFactorSlider: document.getElementById("§RANDOM_ID§-edge-size-factor-slider"),
           edgeCurvatureText: document.getElementById("§RANDOM_ID§-edge-curvature-text"),
@@ -3532,6 +3610,7 @@
             },
           },
         },
+        
 
         init(){
           // Containers
@@ -3599,8 +3678,17 @@
           ui.elements.nodeLabelRotationText.innerHTML = ui.convert.numberToText(state.nodeLabelRotation);
           ui.elements.nodeLabelRotationSlider.value = state.nodeLabelRotation;
           // Edges
+          ui.elements.edge
           ui.composites.menu.setItem(ui.elements.edgeHead, ui.elements.edgeBody, false);
           ui.elements.edgeCheckbox.checked = state.showEdges;
+
+
+          // edgelist_membership
+          //ui.elements.edgeCheckboxGroup1.checked = True;
+          //ui.elements.edgeCheckboxGroup2.checked = True;
+
+
+
           ui.elements.edgeSizeFactorText.innerHTML = ui.convert.numberToText(state.edgeSizeFactor);
           ui.elements.edgeSizeFactorSlider.value = state.edgeSizeFactor;
           ui.elements.edgeCurvatureText.innerHTML = ui.convert.numberToText(state.edgeCurvature);
@@ -3688,6 +3776,7 @@
             state.parsedData.general.edge_properties.edge_size_data_sources,
             state.edgeSizeDataSource,
           );
+
         },
 
         deleteChildElements(element){
@@ -3951,6 +4040,27 @@
             state.currentGraphParts.edgeMainGroup.style("display", ui.convert.boolToDisplayStyle(state.showEdges));
             ui.composites.graph.updateEdgePositions();
           };
+
+
+          //edgelist_membership
+          // make two checkboxes - one for each edge list in edgelist_membership
+          // when one is checked, show edges from that list
+
+          // ui.elements.edgeCheckboxGroup1.onchange = function(){
+          // state.edgelist1 = this.checked;
+          // state.currentGraphParts.edgeGroups
+          //   .filter(d => d.edgelist_membership === "list1")
+          //   .style("display", ui.convert.boolToDisplayStyle(state.edgesGroup1));
+          // };
+          // ui.elements.edgeCheckboxGroup2.onchange = function(){
+          // state.edgelist2 = this.checked;
+          // state.currentGraphParts.edgeGroups
+          //   .filter(d => d.edgelist_membership === "list2")
+          //   .style("display", ui.convert.boolToDisplayStyle(state.edgesGroup2));
+          // };
+
+
+
           ui.elements.edgeSizeFactorSlider.oninput = function(){
             ui.elements.edgeSizeFactorText.innerHTML = ui.convert.numberToText(this.value);
           };
